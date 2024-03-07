@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>转盘抽奖</title>
+<!-- 这里是CSS代码，与您之前提供的一致，可以直接复制使用 -->
+<style>
+    .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        margin: 0;
+    }
+    #wheel {
+        width: 300px;
+        height: 300px;
+        border-radius: 50%;
+        background-image: url('https://p16-bot-sign-sg.ciciai.com/tos-alisg-i-b2l6bve69y-sg/92a0ed06bd294b409b97b5ae4132a672.webp~tplv-b2l6bve69y-image.jpeg?rk3s=50ccb0c5&x-expires=1709890214&x-signature=pN83bukp4w0UQUVk18rwVhrdS1k%3D');
+        background-size: cover;
+        background-position: center;
+    }
+    #controls {
+        text-align: center;
+        padding-top: 20px;
+    }
+    button, #result {
+        margin-top: 10px;
+    }
+
+    .spin-button {
+        cursor: pointer;
+        border: none;
+        background-color: transparent;
+    }
+    
+    .hidden {
+        display: none;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <div id="wheel"></div>
+    <div id="controls">
+        <!-- 使用图片作为抽奖按钮 -->
+        <img src="https://p19-bot-sign-sg.ciciai.com/tos-alisg-i-b2l6bve69y-sg/45d8f5182fd440b6964d0d291d8cdf7c.png~tplv-b2l6bve69y-image.jpeg?rk3s=50ccb0c5&x-expires=1709904206&x-signature=YvEz0A1ugAhV%2FD6iAYqDsPt0GEU%3D" id="spin" class="spin-button" />
+        <div id="result"></div>
+    </div>
+</div>
+
+<script>
+ var prizeDistribution = [
+    { prize: "大奖！清空购物车", weight: 50, range: [0, 179] },
+    { prize: "亲老公一下", weight: 20, range: [180, 251] },
+    { prize: "再抽一次", weight: 10, range: [252, 287] },
+    { prize: "抱老公一下", weight: 10, range: [288, 359] },
+	{ prize: "爱马仕包包", weight: 10, range: [360, 420] },
+	{ prize: "香奈儿包包", weight: 10, range: [421, 487] },
+	{ prize: "巴黎世家包包", weight: 10, range: [488, 520] }
+  ];
+
+  function calculateFinalAngle(prizeIndex) {
+    var min = prizeDistribution[prizeIndex].range[0];
+    var max = prizeDistribution[prizeIndex].range[1];
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  function removePrize(prizeIndex) {
+    // 移除已中的奖品
+    prizeDistribution = prizeDistribution.filter(function(prize, index) {
+        return index !== prizeIndex;
+    });
+  }
+
+  function selectPrizeByWeight(prizes) {
+    var totalWeight = prizes.reduce(
+      (acc, obj) => acc + obj.weight, 0);
+    var randomNum = Math.random() * totalWeight;
+    for (var i = 0; i < prizes.length; i++) {
+      if (randomNum < prizes[i].weight) {
+        return i;
+      }
+      randomNum -= prizes[i].weight;
+    }
+    return null;
+  }
+
+  var rotation = 0;
+  document.getElementById('spin').addEventListener('click', function() {
+      var wheel = document.getElementById('wheel');
+      var resultDiv = document.getElementById('result');
+      // 先清除上一次的抽奖结果
+      resultDiv.textContent = '';
+
+      if (prizeDistribution.length === 0) {
+        resultDiv.textContent = '奖品抽完啦，要一辈子和赖赖在一起，不然啥都没啦！';
+      } else {
+        var selectedPrizeIndex = selectPrizeByWeight(prizeDistribution);
+        var finalAngle = calculateFinalAngle(selectedPrizeIndex);
+
+        rotation = 360 * 2; // 转4圈
+        var extraAngle = finalAngle;
+
+        wheel.style.transition = 'none';
+        wheel.style.transform = 'rotate(' + extraAngle + 'deg)';
+        window.getComputedStyle(wheel).transform;
+
+        wheel.style.transition = 'all 4s ease-out';
+        wheel.style.transform = 'rotate(' + (rotation + extraAngle) + 'deg)';
+        wheel.addEventListener('transitionend', function() {
+            var prizeText = '恭喜您获得: ' + prizeDistribution[selectedPrizeIndex].prize;          
+            resultDiv.textContent = prizeText;
+            // 剔除已获得的奖品
+            removePrize(selectedPrizeIndex);           
+        },{once: true});
+      }
+  });
+</script>
+</body>
+</html>
